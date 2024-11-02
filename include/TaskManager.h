@@ -21,7 +21,7 @@ public:
 
     void Add(std::function<void()> task, std::time_t timestamp);
     void startThread();
-   // void RunTasks();
+    void eraseTask(std::vector<Task>::iterator it);
 };
 
 #endif // TASKMANAGER_H
