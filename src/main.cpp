@@ -1,6 +1,6 @@
 #include "../include/TaskManager.h"
 #include <iostream>
-#include <thread>
+#include <ctime>
 
 void testTask() {
     std::cout << "test executed" << std::endl;
@@ -9,14 +9,9 @@ void testTask() {
 int main() {
     TaskManager manager;
 
-    std::time_t now = std::time(nullptr);
+    const std::time_t now = std::time(nullptr);
     manager.Add(testTask, now + 3);
     manager.Add([] { std::cout << "task2 executed" << std::endl; }, now + 5);
-
-    while(true) {
-        manager.RunTasks();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-
+    //std::cout << "sync test" << std::endl;
     return 0;
 }
