@@ -15,5 +15,7 @@ int main() {
     manager.eraseTask(firstTaskId);
 
     std::this_thread::sleep_for(std::chrono::seconds(10));
+    manager.Add(testTask, now+15);
+    std::this_thread::sleep_for(std::chrono::seconds(10));
     return 0;
 }

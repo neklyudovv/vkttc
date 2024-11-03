@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <thread>
 #include <ctime>
+#include <mutex>
+#include <condition_variable>
 
 class TaskManager {
 private:
@@ -16,6 +18,9 @@ private:
 
     std::unordered_map<int, Task> tasks;
     std::thread taskThread;
+    std::mutex m;
+    std::condition_variable cv;
+    bool running = true;
 
 public:
     TaskManager();
