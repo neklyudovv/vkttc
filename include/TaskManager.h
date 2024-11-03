@@ -2,7 +2,7 @@
 #define TASKMANAGER_H
 
 #include <functional>
-#include <vector>
+#include <unordered_map>
 #include <thread>
 #include <ctime>
 
@@ -12,16 +12,18 @@ private:
         std::function<void()> func;
         std::time_t timestamp;
     };
-    std::vector<Task> tasks;
+    int id= 0;
+
+    std::unordered_map<int, Task> tasks;
     std::thread taskThread;
 
 public:
     TaskManager();
     ~TaskManager();
 
-    void Add(std::function<void()> task, std::time_t timestamp);
+    int Add(std::function<void()> task, std::time_t timestamp);
     void startThread();
-    void eraseTask(std::vector<Task>::iterator it);
+    void eraseTask(int id);
 };
 
 #endif // TASKMANAGER_H

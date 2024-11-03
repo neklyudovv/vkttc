@@ -13,22 +13,24 @@ TaskManager::~TaskManager(){
 
 void TaskManager::startThread(){
     taskThread = std::thread([this](){ // анонимная лямбда функция для обращения к tasks
-    while(true){
+    while(!tasks.empty()){
         std::time_t now = std::time(nullptr);
         for (auto it = tasks.begin(); it != tasks.end();)
-            if (it->timestamp <= now) {
-                it->func();
-                eraseTask(it);
+            if (it->second.timestamp <= now) {
+                it->second.func();
+                eraseTask(it->first);
+                it = tasks.find(it->first);
             } else ++it;
         std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     });
 }
 
-void TaskManager::eraseTask(std::vector<Task>::iterator it){
-    tasks.erase(it);
+void TaskManager::eraseTask(int id){
+    tasks.erase(id);
 }
 
-void TaskManager::Add(std::function<void()> task, std::time_t timestamp){
-    tasks.push_back({task, timestamp});
+int TaskManager::Add(std::function<void()> task, std::time_t timestamp){
+    tasks[id] = {task, timestamp};
+    return id++;
 }
