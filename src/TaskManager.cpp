@@ -27,7 +27,11 @@ void TaskManager::startThread(){
         std::time_t now = std::time(nullptr);
         for (auto it = tasks.begin(); it != tasks.end();)
             if (it->second.timestamp <= now) {
-                it->second.func();
+                std::thread currTask = std::thread([func=it->second.func](){func();});
+                currTask.detach();
+                // запуск task в новом потоке, чтобы не дожидаться выполнения функции
+                // ресурсы освободятся после завершения потока автоматически, но из-за этого
+                // лучше не использовать с функциями, которые надо строго контроллировать
                 it = tasks.erase(it);
                 break;
             } else ++it;
@@ -42,10 +46,9 @@ void TaskManager::eraseTask(int id){
 }
 
 int TaskManager::Add(std::function<void()> task, std::time_t timestamp){
-    {
-        std::lock_guard<std::mutex> lock(m);
-        tasks[id] = {task, timestamp};
-    }
+    // убрал блок, чтобы при return id++ не возникало конфликтов с одновременной инкрементацией
+    std::lock_guard<std::mutex> lock(m);
+    tasks[id] = {task, timestamp};
     cv.notify_all();
     return id++;
 }
