@@ -1,4 +1,4 @@
-## Стажировка в VK <br>Backend Developer (Профильное задание)**
+## Стажировка в VK <br>Backend Developer (Профильное задание)
 
 **Задача**:  
 Реализовать класс планировщик задач. В классе должен быть метод `Add(std::function<void()> task, std::time_t timestamp)`, параметры:  
