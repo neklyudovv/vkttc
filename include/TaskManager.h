@@ -26,8 +26,8 @@ public:
     TaskManager();
     ~TaskManager();
 
-    int Add(std::function<void()> task, std::time_t timestamp);
     void startThread();
+    int Add(std::function<void()> task, std::time_t timestamp);
     void eraseTask(int id);
 };
 
