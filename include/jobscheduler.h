@@ -8,7 +8,7 @@
 #include <mutex>
 #include <condition_variable>
 
-class TaskManager {
+class jobscheduler {
 private:
     struct Task {
         std::function<void()> func;
@@ -23,8 +23,8 @@ private:
     bool running = true;
 
 public:
-    TaskManager();
-    ~TaskManager();
+    jobscheduler();
+    ~jobscheduler();
 
     void startThread();
     int Add(std::function<void()> task, std::time_t timestamp);

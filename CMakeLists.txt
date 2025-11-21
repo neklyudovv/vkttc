@@ -7,7 +7,7 @@ include_directories(include)
 
 set(SOURCES
     src/main.cpp
-    src/TaskManager.cpp
+        src/jobscheduler.cpp
 )
 
 add_executable(main ${SOURCES})

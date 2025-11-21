@@ -1,7 +1,7 @@
-## TaskManager
+## JobScheduler
 
-**TaskManager** is a lightweight scheduled functions runner based on threads.
-Tasks are executed asynchronously in a separate worker thread, without blocking the main program flow.
+**JobScheduler** is a lightweight scheduled job runner built on top of threads.
+Jobs are executed asynchronously in a separate worker thread, without blocking the main program flow.
 Synchronization is handled via `std::thread`, `std::mutex`, and `std::condition_variable`.
 
 ---
@@ -18,13 +18,15 @@ Synchronization is handled via `std::thread`, `std::mutex`, and `std::condition_
 
 ## Solution Overview
 
-The project implements a class for managing and executing timed tasks using a dedicated thread and synchronization primitives.
+The project implements a class for scheduling and executing jobs at predefined timestamps using a dedicated worker thread and synchronization primitives.
+Internally, jobs are represented as tasks stored in a container.
+
 Key methods: `Add`, `eraseTask`, `startThread`.
 
 ### `Add`
 
 * **Parameters**: `std::function<void()> task`, `std::time_t timestamp`
-* **Description**: Inserts a task into the container and wakes the worker thread if it’s waiting.
+* **Description**: Inserts a new task (job) into the container and wakes the worker thread if needed.
 
 ### `eraseTask`
 
@@ -33,24 +35,24 @@ Key methods: `Add`, `eraseTask`, `startThread`.
 
 ### `startThread` (internal)
 
-* **Description**: Launches the worker thread.
-  The thread monitors pending tasks and executes them at the specified time.
-  If no tasks exist, it waits until notified.
+* **Description**: Starts the worker thread.
+  The thread monitors pending tasks and executes the corresponding job when its timestamp is reached.
+  If no tasks are available, the thread waits until it receives a notification.
 
 ---
 
 ## Architecture
 
-1. **TaskManager**
+1. **JobScheduler**
 
-    * Stores tasks in an `unordered_map` keyed by task ID.
+    * Stores scheduled tasks in an `unordered_map` keyed by job ID.
     * Uses a dedicated worker thread for scheduling.
     * Ensures thread-safety with a mutex and condition variable.
 
 2. **Asynchronous Execution**
 
-    * Tasks run asynchronously using `std::thread` with `detach()`.
-    * The scheduler thread never blocks on task execution.
+    * Each job is executed asynchronously using `std::thread` with `detach()`.
+    * The scheduler thread never blocks while a job is running.
 
 ---
 

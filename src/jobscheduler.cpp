@@ -1,12 +1,12 @@
-#include "../include/TaskManager.h"
+#include "../include/jobscheduler.h"
 #include <ctime>
 #include <thread>
 #include <condition_variable>
 
-TaskManager::TaskManager(){
+jobscheduler::jobscheduler(){
     startThread();
 }
-TaskManager::~TaskManager(){
+jobscheduler::~jobscheduler(){
     {
         std::lock_guard<std::mutex> lock(m);
         running = false;
@@ -25,7 +25,7 @@ TaskManager::~TaskManager(){
 * using mutex and condition variable for safe data usage
 */
 
-void TaskManager::startThread(){
+void jobscheduler::startThread(){
     taskThread = std::thread([this](){
     while (true) {
         std::unique_lock<std::mutex> lock(m);
@@ -47,12 +47,12 @@ void TaskManager::startThread(){
     });
 }
 
-void TaskManager::eraseTask(int id){
+void jobscheduler::eraseTask(int id){
     std::lock_guard<std::mutex> lock(m);
     tasks.erase(id);
 }
 
-int TaskManager::Add(std::function<void()> task, std::time_t timestamp){
+int jobscheduler::Add(std::function<void()> task, std::time_t timestamp){
     std::lock_guard<std::mutex> lock(m);
     tasks[id] = {task, timestamp};
     cv.notify_all();

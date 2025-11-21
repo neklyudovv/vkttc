@@ -1,4 +1,4 @@
-#include "../include/TaskManager.h"
+#include "../include/jobscheduler.h"
 #include <iostream>
 #include <ctime>
 
@@ -8,7 +8,7 @@ void testTask() {
 }
 
 int main() {
-    TaskManager manager;
+    jobscheduler manager;
 
     const std::time_t now = std::time(nullptr);
 
