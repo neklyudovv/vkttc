@@ -1,83 +1,98 @@
 ## TaskManager
 
-TaskManager — это планировщик задач с использованием потоков. Задачи выполняются асинхронно в отдельном потоке, не блокируя основной поток программы.    
-Это достигается благодаря применению `std::thread`, `std::mutex`, и `std::condition_variable`.
-
-Выполнено в рамках профильного задания на стажировку VK.
-
----
-
-## Содержание
-- [Описание решения](#описание-решения)
-- [Архитектура](#архитектура)
-- [Установка и сборка](#установка-и-сборка)
-- [Технические детали](#технические-детали)
-- [TODO](#todo)
+**TaskManager** is a lightweight scheduled functions runner based on threads.
+Tasks are executed asynchronously in a separate worker thread, without blocking the main program flow.
+Synchronization is handled via `std::thread`, `std::mutex`, and `std::condition_variable`.
 
 ---
 
-## Описание решения
-Реализован класс для управления и выполнения задач с использованием потоков и примитивов синхронизации.     
-Методы класса: `Add`, `eraseTask`, `startThread`.
+## Contents
 
-**метод `Add`**
-- **входные параметры**: `std::function<void()> task`, `std::time_t timestamp`
-- **описание**: Добавляет задачу в контейнер с задачами и возобновляет поток, если он был приостановлен
-
-**метод `eraseTask`**
-- **Входные параметры**: `int id`
-- **Описание**: Удаляет задачу по ее идентификатору из контейнера задач
-
-**вспомогательный метод `startThread`**
-- **Описание**: Инициализирует поток, который проверяет, есть ли задачи в очереди и выполняет их в указанное время. При их отсутствии поток засыпает до тех пор, пока не поступит сигнал об обновлении списка задач
+* [Solution Overview](#solution-overview)
+* [Architecture](#architecture)
+* [Build & Installation](#build--installation)
+* [Technical Details](#technical-details)
+* [TODO](#todo)
 
 ---
 
-## Архитектура
-1. **TaskManager**:
-    - хранит задачи в `unordered_map`, где ключом служит идентификатор задачи
-    - использует поток для отслеживания времени выполнения задач
-    - управляет синхронизацией с помощью мьютекса и условной переменной
+## Solution Overview
 
+The project implements a class for managing and executing timed tasks using a dedicated thread and synchronization primitives.
+Key methods: `Add`, `eraseTask`, `startThread`.
 
-2. **Асинхронное выполнение**:
-    - задачи запускаются с использованием `std::thread` и `detach()` для обеспечения асинхронности
-    - основной поток проверки задач не блокируется выполнением задач
+### `Add`
+
+* **Parameters**: `std::function<void()> task`, `std::time_t timestamp`
+* **Description**: Inserts a task into the container and wakes the worker thread if it’s waiting.
+
+### `eraseTask`
+
+* **Parameters**: `int id`
+* **Description**: Removes a task by its identifier.
+
+### `startThread` (internal)
+
+* **Description**: Launches the worker thread.
+  The thread monitors pending tasks and executes them at the specified time.
+  If no tasks exist, it waits until notified.
 
 ---
 
-## Установка и сборка
-1. Для сборки и запуска проекта должен быть установлен CMake.
-2. Склонировать репозиторий:
+## Architecture
+
+1. **TaskManager**
+
+    * Stores tasks in an `unordered_map` keyed by task ID.
+    * Uses a dedicated worker thread for scheduling.
+    * Ensures thread-safety with a mutex and condition variable.
+
+2. **Asynchronous Execution**
+
+    * Tasks run asynchronously using `std::thread` with `detach()`.
+    * The scheduler thread never blocks on task execution.
+
+---
+
+## Build & Installation
+
+1. Ensure CMake is installed.
+2. Clone the repository:
+
    ```
    git clone https://github.com/neklyudovv/vkttc.git
    ```
-3. Перейти в директорию проекта:
+3. Enter the project directory:
+
    ```
    cd vkttc
    ```
-4. Создать папку сборки и собрать проект:
+4. Create a build directory and compile:
+
    ```
    mkdir build && cd build
    cmake ..
    make
    ```
 
-
 ---
 
-## Технические детали
-- **потоковая модель**:
-    - основной поток `TaskManager` выполняет цикл с ожиданием появления новых задач и приостанавливает свою работу при их отсутствии
-    - при совпадении `timestamp` и текущего времени задача запускается в отдельном потоке
-- **синхронизация**:
-    - используется `std::mutex` для защиты контейнера с задачами, контроля доступа к методам `Add` и `eraseTask` и избежания гонки данных
-    - `std::condition_variable` используется для пробуждения потока при добавлении новой задачи
+## Technical Details
+
+* **Thread model**
+
+    * The worker thread waits for incoming tasks and sleeps when none are available.
+    * When the current time reaches the task’s timestamp, the task is executed in a new thread.
+
+* **Synchronization**
+
+    * `std::mutex` protects the task container and all operations modifying it.
+    * `std::condition_variable` is used to wake the worker thread on updates.
 
 ---
 
 ## TODO
-- заменить `std::unordered_map` на `std::map`, добавить сортировку задач по времени исполнения
-- оптимизировать работу при помощи `std::condition_variable::wait_until()`
-- добавить обработчик ошибок, в том числе при вызове методов с неправильными аргументами (напр. уже прошедший `timestamp`)
-- провести нагрузочное тестирование для оценки производительности при большом количестве задач
+
+* Improve scheduling with `std::condition_variable::wait_until()`.
+* Add error handling (e.g., invalid timestamps such as values in the past).
+* Run load testing to evaluate performance with a large number of tasks.
